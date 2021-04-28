@@ -1,0 +1,30 @@
+{
+    "buttList":[
+        {"desc":"0", "keyCode":"", "id":""},
+        {"desc":"1", "keyCode":"", "id":""},
+        {"desc":"2", "keyCode":"", "id":""},
+        {"desc":"3", "keyCode":"", "id":""},
+        {"desc":"4", "keyCode":"", "id":""},
+        {"desc":"5", "keyCode":"", "id":""},
+        {"desc":"6", "keyCode":"", "id":""},
+        {"desc":"7", "keyCode":"", "id":""},
+        {"desc":"8", "keyCode":"", "id":""},
+        {"desc":"9", "keyCode":"", "id":""},
+        {"desc":"-", "keyCode":"", "id":""},
+        {"desc":"+", "keyCode":"", "id":""},
+        {"desc":"*", "keyCode":"", "id":""},
+        {"desc":"/", "keyCode":"", "id":""},
+        {"desc":"=", "keyCode":"", "id":""},
+        {"desc":"AC", "keyCode":"", "id":""},
+        {"desc":"CE", "keyCode":"", "id":""},
+        {"desc":"sqrt", "keyCode":"", "id":""},
+        {"desc":"pow", "keyCode":"", "id":""},
+        {"desc":".", "keyCode":"", "id":""},
+        {"desc":"+/-", "keyCode":"", "id":""},
+        {"desc":"sci", "keyCode":"", "id":""},
+        {"desc":"", "keyCode":"", "id":""},
+        {"desc":"", "keyCode":"", "id":""},
+        {"desc":"", "keyCode":"", "id":""}
+
+    ]
+}
