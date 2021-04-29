@@ -17,3 +17,17 @@
  * calculation history/undo
  * on the fly number edit
  * history change
+
+# v0.3 Basics
+## new
+ * basic positive float calculation
+ * clear all, clear entry, backspace function
+ * removed scientific notation
+ * no leading zero/dupe zeroes/dupe decimal
+ * no dupe operators
+
+### to do
+ * sqrt/^2
+ * negative numbers
+ * consecutive calculations
+ * on/off
