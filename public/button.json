@@ -3,6 +3,7 @@
         {"desc":"ac", "keyCode":"", "id":"clear", "class":"int dang"},
         {"desc":"ce", "keyCode":"", "id":"clearE", "class":"int dang"},
         {"desc":"bksp", "keyCode":"8", "id":"backSp", "class":"int dang"},
+        {"desc":"e", "keyCode":"69", "id":"sciNot", "class":"int oper"},
         {"desc":"7", "keyCode":"103", "id":"seven", "class":"int num"},
         {"desc":"8", "keyCode":"104", "id":"eight", "class":"int num"},
         {"desc":"9", "keyCode":"105", "id":"nine", "class":"int num"},

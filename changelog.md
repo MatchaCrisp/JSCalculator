@@ -30,4 +30,22 @@
  * sqrt/^2
  * negative numbers
  * consecutive calculations
- * on/off
+
+ * calculation history
+ * history change
+
+# v0.4 Basics2
+## new
+ * sqrt/^2
+ * negative numbers
+ * consecutive calculations
+ * scientific notationn
+ * backspace function with scientific notation
+
+### to do
+ * refactor (extremely redundant and messy code)
+ * FCC compliant negative number
+ * FCC compliant display
+
+ * calculation history
+ * history change
