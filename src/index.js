@@ -61,38 +61,58 @@ const Calc=()=>{
   const [dec,setDec]=useState(false);
   const [res,setRes]=useState('');
   const [ey,setEy]=useState(false);
-  //takes in array, array, and string to do calculations in mathjs, returning a string at the end.
-  const calcing=(n1,n2,op)=>{
-    const opL=math.bignumber(n1.join(''));
-    const opR=math.bignumber(n2.join(''));
-    let ans='';
-      if (op==='+') {
-        ans= (math.add(opL,opR).toString());
-      }
-      else if (op==='-') {
-        ans= (math.subtract(opL,opR).toString());
-      }
-      else if (op==='*') {
-        ans= (math.multiply(opL,opR).toString());
-      }
-      else if (op==='/') {
-        //custom msg of dividing by zero
-        if (op2.join('')==='0')
-          ans= ('undefined');
-        else
-          ans= (math.divide(opL,opR).toString());
-      }
-    return ans;
+  
+  //only works with both operands and the operator all present
+  const calcing=()=>{
+    return new Promise((resolve,reject)=>{
+      const opL=math.bignumber(op1.join(''));
+      const opR=math.bignumber(op2.join(''));
+      let ans='';
+        if (oper==='+') {
+          ans= (math.add(opL,opR).toString());
+        }
+        else if (oper==='-') {
+          ans= (math.subtract(opL,opR).toString());
+        }
+        else if (oper==='*') {
+          ans= (math.multiply(opL,opR).toString());
+        }
+        else if (oper==='/') {
+          //custom msg of dividing by zero
+          if (op2.join('')==='0')
+            ans= ('undefined');
+          else
+            ans= (math.divide(opL,opR).toString());
+        }
+        else 
+          reject(new Error ('invalid operator'));
+
+        resolve(ans);
+    });
   }
   const resetto=()=>{
-    setOp1([]);
-    setOper('');
-    setOp2(["0"]);
-    setRes('');
-    setDec(false);
-    setEy(false);
+    return new Promise((resolve,reject)=>{
+      setOp1([]);
+      setOper('');
+      setOp2(["0"]);
+      setRes('');
+      setDec(false);
+      setEy(false);
+      resolve('reset');
+    });
   }
 
+  const goNext=async(op)=>{
+    const numm=res;
+    const msg=await resetto();
+    if (msg==='reset') {
+      setOp1(numm.split(''));
+      setOper(op);
+    }
+    else 
+      throw new Error ('reset not successful');
+
+  }
   //distribute 
   const handleEvent=e=>{
 
@@ -125,54 +145,55 @@ const Calc=()=>{
   }
 
   //0-9&decimal point
+  // ****** stopping refactor point
   const handleNum=num=>{
+    const theNum=num=>{
+      //max of 30 digits as input
+const len=op2.length-(dec?1:0);
+//input in the case of no finished calculation
+if (len<30 && res==='') {
+  //dealing with leading zero
+  if (num==='0') {
+    //case of no number & case of decimal point present
+    if (op2.length===0 || dec)
+      setOp2(op2.concat(num));
+    //case of no already leading zero
+    else if (op2[0]!=='0')
+      setOp2(op2.concat(num));
+  }
+  //dealing with no dupe decimal
+  else if (num==='.') {
+    //case of no number
+    if (op2.length===0){
+      setOp2(op2.concat(['0',num]));
+      setDec(true);
+    }
+    //case of no decimal and no scientific notation
+    else if (!dec && !ey) {
+      setOp2(op2.concat(num));
+      setDec(true);
+    }
+  }
+  //dealing with 1-9
+  else {
+    //case of only zero, no decimals
+    if (op2.length>0 && !dec && op2[0]==='0')
+      setOp2([num]);
+    //all other cases
+    else 
+      setOp2(op2.concat(num));
+  }
+}
+}
     //case of complete calculation
     if (res!=='') {
-      setOp1([]);
-      setOper('');
-      setOp2([num]);
-      setRes('');
-      setDec(false);
-      setEy(false);
+      resetto().then(theNum(num)).catch(console.log);
     }
-    //max of 30 digits as input
-    //input in the case of no finished calculation
-    else if ((op2.length-(dec?1:0))<30 && res==='') {
-      //dealing with leading zero
-      if (num==='0') {
-        //case of no number
-        if (op2.length===0)
-          setOp2(op2.concat(num));
-        //case of decimal point present
-        else if (dec)
-          setOp2(op2.concat(num));
-        //case of no already leading zero
-        else if (op2[0]!=='0')
-          setOp2(op2.concat(num));
-      }
-      //dealing with no dupe decimal
-      else if (num==='.') {
-        //case of no number
-        if (op2.length===0){
-          setOp2(op2.concat(['0',num]));
-          setDec(true);
-        }
-        //case of no decimal and no scientific notation
-        else if (!dec && !ey) {
-          setOp2(op2.concat(num));
-          setDec(true);
-        }
-      }
-      //dealing with 1-9
-      else {
-        //case of only zero, no decimals
-        if (op2.length>0 && !dec && op2[0]==='0')
-          setOp2([num]);
-        //all other cases
-        else 
-          setOp2(op2.concat(num));
-      }
-    }
+    else
+      theNum(num);
+
+
+
       
   }
 
@@ -180,12 +201,8 @@ const Calc=()=>{
   const handleArith=op=>{
     //case of complete calculation
     if (res!=='') {
-      setOp1(res.split(''));
-      setOper(op);
-      setOp2([]);
-      setRes('');
-      setDec(false);
-      setEy(false);
+
+      goNext(op).catch(console.log);
     }
     //no operators
     else if (oper==='') {
@@ -193,11 +210,18 @@ const Calc=()=>{
       if (op2.length>0) {
         //either no scientific notation, or a complete sci not (number must exist after e+)
         if (!ey || op2[op2.length-1]!=='+') {
-          setOp1(op2.slice(0,op2.length));
-          setOper(op);
-          setOp2([]);
-          setDec(false);
-          setEy(false);
+
+          const moveOp2=async()=>{
+            const toMove=op2;
+            const msg=await resetto();
+            if (msg==='reset') {
+              setOp1(toMove.slice(0,toMove.length));
+              setOper(op);
+            }
+            else 
+            throw new Error ('reset not successful');
+          }
+          moveOp2().catch(console.log);
         }
 
       }
@@ -212,12 +236,12 @@ const Calc=()=>{
       else {
         //either no scientific notation, or a complete sci not (number must exist after e+) and its not just a - sign
         if ((!ey || op2[op2.length-1]!=='+')&&op2[op2.length-1]!=='-') {
-          setOp1(calcing(op1,op2,oper).split(''));
-          setOper(op);
-          setOp2([]);
-          setRes('');
-          setDec(false);
-          setEy(false);
+          const skipRes=async()=>{
+            const res=await calcing();
+            setRes(res);
+            goNext(op);
+          }
+          skipRes().catch(console.log);
         }
 
       }
@@ -231,7 +255,7 @@ const Calc=()=>{
     if (op1.length>0 && oper!=='' && op2.length>0) {
       //either no scientific notation, or a complete sci not (number must exist after e+) and its not just a - sign
       if ((!ey || op2[op2.length-1]!=='+')&&op2[op2.length-1]!=='-')
-        setRes(calcing(op1,op2,oper));
+        setRes(calcing().catch(console.log));
 
     }
 
@@ -241,12 +265,16 @@ const Calc=()=>{
   const handleSign=()=>{
     //case of complete calculation
     if (res!=='') {
-      setOp1([]);
-      setOper('');
-      setOp2(['-']);
-      setRes('');
-      setDec(false);
-      setEy(false);
+      const resNeg=async()=>{
+        const msg=await resNeg();
+        if (msg==='reset') {
+          setOp2(['-']);
+        }
+        else
+          throw new Error('reset unsuccessful');
+      }
+      resNeg().catch(console.log);
+
     }
     //case of existing op2
     else if (op2.length>0) {
@@ -295,7 +323,7 @@ const Calc=()=>{
   const handleClear=e=>{
     //all clear
     if (e==='ac') {
-      resetto();
+      resetto().catch(console.log);
     }
     //clear entry
     else {
