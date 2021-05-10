@@ -91,7 +91,7 @@ const Calc=()=>{
     });
   }
   const resetto=()=>{
-    return new Promise((resolve,reject)=>{
+    return new Promise(resolve=>{
       setOp1('');
       setOper('');
       setOp2('');
@@ -101,9 +101,12 @@ const Calc=()=>{
       resolve('reset');
     });
   }
-  const recordo=()=>{
+  const recordo=num=>{
     return new Promise((resolve,reject)=>{
-      if (op1 && op2 && oper && res) {
+      if (num && op1 && op2 && oper) {
+        resolve(op1.concat(oper).concat(op2).concat('=').concat(num));
+      }
+      else if (op1 && op2 && oper && res) {
         resolve(op1.concat(oper).concat(op2).concat('=').concat(res));
       }
       else
@@ -146,6 +149,7 @@ const Calc=()=>{
   // ****** stopping refactor point
   const handleNum=num=>{
     const theNum=num=>{
+      console.log('processing',num);
       //max of 30 digits as input
       const len=op2.length-(dec?1:0);
       //input in the case of no finished calculation
@@ -185,11 +189,7 @@ const Calc=()=>{
     }
     //case of complete calculation
     if (res!=='') {
-      const newEmpty=async(num)=>{
-        await resetto();
-        theNum(num);
-      }
-      newEmpty(num).catch(console.log);
+      resetto().then(theNum(num)).catch(console.log);
     }
     else
       theNum(num);    
@@ -227,8 +227,12 @@ const Calc=()=>{
     }
     //operator already exists
     else {
+      //case of -
+      if (op==='-') {
+        handleSign();
+      }
       //case of no second operand
-      if (op2.length===0) {
+      else if (op2.length===0) {
         setOper(op);
       }
       //case of two operands
@@ -237,10 +241,9 @@ const Calc=()=>{
         if ((!ey || op2[op2.length-1]!=='+')&&op2[op2.length-1]!=='-') {
           const halfHalf=async(op)=>{
             const rekt=await calcing();
-            setRes(rekt);
-            const reco=await recordo();
-            setHist(hist.concat([reco]));
+            const reco=await recordo(rekt);
             await resetto();
+            setHist(hist.concat([reco]));
             setOp1(rekt);
             setOper(op);
           }
@@ -260,8 +263,8 @@ const Calc=()=>{
       if ((!ey || op2[op2.length-1]!=='+')&&op2[op2.length-1]!=='-') {
         const completion=async()=>{
           const rekt=await calcing();
+          const reco=await recordo(rekt);
           setRes(rekt);
-          const reco=await recordo();
           setHist(hist.concat([reco]));
         }
         completion().catch(console.log);
@@ -361,6 +364,7 @@ const Calc=()=>{
   }
 
   //handle backspaces
+  //problem of turning op1 back to 2, nd decimals etc
   const handleDel=()=>{
     //only works with existing op2 and no complete calculation
     if (res==='') {
@@ -402,12 +406,12 @@ const histStr=hist.map((h,i)=><li key={i}>{h}</li>);
 
 const Display=props=>{
   //rudimentary handling of display
-  const dispStr=props.op1+' '+props.oper+' '+props.op2+(props.res!==''?'=':'')+props.res;
-
+  const dispStr=props.op1+' '+props.oper+' '+props.op2+(props.res!==''?'=':'');
+  const ans=props.res;
   return (
     <div id="display">
       <p>{dispStr}</p>
-
+      <p>{ans}</p>
     </div>
   )
 }
