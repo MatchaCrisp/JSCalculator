@@ -150,10 +150,6 @@ const Calc=()=>{
   const handleNum=num=>{
     const theNum=num=>{
       console.log('processing',num);
-      //max of 30 digits as input
-      const len=op2.length-(dec?1:0);
-      //input in the case of no finished calculation
-      if (len<30 && res==='') {
         //dealing with leading zero
         if (num==='0') {
           //case of no number & case of decimal point present
@@ -185,13 +181,19 @@ const Calc=()=>{
           else 
             setOp2(op2.concat(num));
         }
-      }
+      
     }
+    
     //case of complete calculation
     if (res!=='') {
-      resetto().then(theNum(num)).catch(console.log);
+      setOp1('');
+      setOper('');
+      setOp2('');
+      setRes('');
+      setDec(false);
+      setEy(false);
     }
-    else
+    if (op2.length-(dec?1:0)<30)
       theNum(num);    
   }
 
@@ -332,7 +334,7 @@ const Calc=()=>{
   const handleClear=e=>{
     //all clear
     if (e==='ac') {
-      resetto().catch(console.log);
+      resetto().then(msg=>setOp2('0')).catch(console.log);
     }
     //clear entry
     else {
@@ -349,12 +351,12 @@ const Calc=()=>{
       }
       //case of 1 operand plus operator
       else if (op1.length>0 && oper) {
-        const oneDel=async()=>{
-          const saveOp1=op1;
-          await resetto();
+        const saveOp1=op1;
+        resetto().then(msg=>{
           setOp2(saveOp1);
-        }
-        oneDel().catch(console.log);
+          setEy((/e\+/i).test(saveOp1));
+          setDec((/\./).test(saveOp1));
+        }).catch(console.log);
       }
       //case of only 1 operand
       else {
@@ -374,14 +376,22 @@ const Calc=()=>{
           setOp2(op2.slice(0,op2.length-2));
           setEy(false);
         }
+        //case of on the decimal
+        else if (op2[op2.length-1]==='.') {
+          setOp2(op2.slice(0,op2.length-1));
+          setDec(false);
+        }
         else {
           setOp2(op2.slice(0,op2.length-1));
         }
       }
       else if (op1.length>0 && oper) {
-        setOp2(op1);
-        setOper('');
-        setOp1('');
+        const saveOp1=op1;
+        resetto().then(msg=>{
+          setOp2(saveOp1);
+          setEy((/e\+/i).test(saveOp1));
+          setDec((/\./).test(saveOp1));
+        }).catch(console.log);
       }
     }
 
