@@ -65,6 +65,7 @@ const Calc=()=>{
   //only works with both operands and the operator all present
   const calcing=()=>{
     return new Promise((resolve,reject)=>{
+      console.log('calcing was called, using op1: ',op1, 'op2: ',op2, 'oper: ',oper);
       const opL=math.bignumber(op1);
       const opR=math.bignumber(op2);
       let ans='';
@@ -92,6 +93,7 @@ const Calc=()=>{
   }
   const recordo=num=>{
     return new Promise((resolve,reject)=>{
+      console.log('recordo was called');
       if (num && op1 && op2 && oper) {
         resolve(op1.concat(oper).concat(op2).concat('=').concat(num));
       }
@@ -136,77 +138,79 @@ const Calc=()=>{
 
   //0-9 & decimal
   const handleNum=num=>{
-    const theNum=(att,num)=>{
+    console.log(`called handleNum, passed: ${num}`)
+    const theNum=num=>{
       return new Promise((resolve,reject)=>{
-        let turntables='';
                 //dealing with leading zero
                 if (num==='0') {
                   //case of no number & case of decimal point present
-                  if (att.length===0 || dec)
-                    turntables = (att.concat(num));
+                  if (op2.length===0 || dec)
+                    setOp2(op2.concat(num));
                   //case of no already leading zero
-                  else if (att[0]!=='0')
-                  turntables = (att.concat(num));
+                  else if (op2[0]!=='0')
+                    setOp2(op2.concat(num));
                 }
                 //dealing with decimal
                 else if (num==='.') {
                       //case of no number
-                      if (att.length===0){
+                      if (op2.length===0){
                         setDec(true);
-                        turntables = (att.concat('0.'));
+                        setOp2(op2.concat('0.'));
               
                       }
                       //case of no decimal and no scientific notation
                       else if (!dec && !ey) {
                         setDec(true);
-                        turntables = (att.concat('.'));
+                        setOp2(op2.concat('.'));
               
                       } 
                 }
                 //dealing with 1-9
-                else {
+                else if (/[1-9]/.test(num)){
                   //case of only zero, no decimals
-                  if (att.length>0 && !dec && att[0]==='0')
-                  turntables = (num);
+                  if (op2.length>0 && !dec && op2[0]==='0')
+                  setOp2(num);
                   //all other cases
                   else 
-                  turntables = (att.concat(num));
+                  setOp2(op2.concat(num));
                 }
-              if (turntables!=='')
-                resolve(turntables);
-              reject(new Error('error!'));
+                else
+                  reject (new Error('unknown input'));
+                resolve('num processed');
       });
 
     }
     
     //case of complete calculation
     if (res!=='') {
-      
-      setOp1('');
-      setOper('');
-      setRes('');
-      setEy(false);
-      if (num==='.') {
-        setOp2('0.');
-        setDec(true);
-      }
-      else {
-        setOp2(num);
-        setDec(false);
-      }
+      const theComp=num=>{return new Promise((resolve)=>{
+        setOp1('');
+        setOper('');
+        setRes('');
+        setEy(false);
+        if (num==='.') {
+          setOp2('0.');
+          setDec(true);
+        }
+        else {
+          setOp2(num);
+          setDec(false);
+        }
+        resolve('reset into new number');
+      })}
+      theComp().catch(console.log);
     }
     else if (op2.length-(dec?1:0)<30) {
-      const proc=async()=>{
-        const newOp2=await theNum(op2,num);
-        setOp2(newOp2);
-      }
-      proc().catch(console.log);
+
+      theNum(num).catch(console.log);
     }
 
   }
 
   //+ - * /
+  //new refactor stopping point
   const handleArith=op=>{
+    console.log(`handleArith called ${op}`);
     //case of complete calculation
     if (res!=='') {
         const rem=res;
@@ -239,7 +243,7 @@ const Calc=()=>{
     //operator already exists
     else {
       //case of -
-      if (op==='-') {
+      if (op==='-' && op2.length===0) {
         handleSign();
       }
       //case of no second operand
@@ -271,6 +275,7 @@ const Calc=()=>{
 
   // enter (equals)
   const handleEnt=()=>{
+    console.log('handleEnt called');
     //only works with existing op1, op2, and a operator
     if (res===''&&op1.length>0 && oper!=='' && op2.length>0) {
       //either no scientific notation, or a complete sci not (number must exist after e+) and its not just a - sign
@@ -290,6 +295,7 @@ const Calc=()=>{
 
   //handle +/-
   const handleSign=()=>{
+    console.log('handleSign called');
     //case of complete calculation
     if (res!=='') {
       setOp1('');
@@ -314,6 +320,7 @@ const Calc=()=>{
 
   //handle sci notation
   const handleEy=()=>{
+    console.log('handleEy called');
     //only works with existing op2 that is not just a zero
     if (op2.length>0) {
       if (op2[0]!=='0' || (dec&&op2.length>2)) {
@@ -324,6 +331,7 @@ const Calc=()=>{
   }
   //sqrt, squared
   const handleOther=op=>{
+    console.log(`handleother called`)
     //only works with existing op2
     if (op2.length>0) {
       const toCalc=math.bignumber(op2);
@@ -347,6 +355,7 @@ const Calc=()=>{
   const handleClear=e=>{
     //all clear
     if (e==='ac') {
+      console.log('all clear called');
       setOp1('');
       setOper('');
       setOp2('0');
@@ -356,6 +365,7 @@ const Calc=()=>{
     }
     //clear entry
     else {
+      console.log('clear entry called');
       //case of calculation completed, or both operands exist
       if (op1.length>0 && op2.length>0) {
 
@@ -442,10 +452,15 @@ const Display=props=>{
   const dispStr=props.op1+' '+props.oper+' '+props.op2+(props.res!==''?'=':'');
   const ans=props.res;
   return (
-    <div id="display">
-      <p>{dispStr}</p>
-      <p>{ans}</p>
+    <div id="scr">
+      <div id='operation'>
+        <p>{ans===''?'':dispStr}</p>
+      </div>
+      <div id="display">
+        <p>{ans===''?dispStr:ans}</p>
+      </div>
     </div>
+
   )
 }
 
