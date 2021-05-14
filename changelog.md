@@ -49,3 +49,18 @@
 
  * calculation history
  * history change
+
+ # v0.5 MVP
+ ## new
+  * FCC compliant calculations
+  * refactored (to best of ability)
+  * calculation history
+  * modulo function
+  * fixed:
+   * issue of state changes dependent on previous states, resulting in fast calculations generating unpredictable results
+   * issue of negative sign being seen as a valid operand
+   * issue of recording history reflecting inaccurate/incomplete calculations
+
+### to do
+ * SCSS
+ * history change (time travel)

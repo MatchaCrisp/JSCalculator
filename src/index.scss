@@ -1,8 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+html {
+  font-size:16px;
+  font-family: 'Orbitron', sans-serif;
+}
 * {
     box-sizing:border-box;
     margin:0;
     padding:0;
   }
+
+
+#app {
+  #calc {
+
+  }
+}
+#calcPad {
+  margin:50px auto 50px auto;
+  height:400px;
+  width:400px;
+  display:grid;
+  grid-template: repeat(5,1fr) / repeat(5,1fr);
+  grid-gap:5px;
   .int {
     display:flex;
     align-items:center;
@@ -31,27 +50,26 @@
     background-color:blue;
     color:gray;
   }
-  #calcPad {
-    margin:50px auto 50px auto;
-    height:400px;
-    width:400px;
-    display:grid;
-    grid-template: repeat(5,1fr) / repeat(5,1fr);
-    grid-gap:5px;
-  }
-  
-  #clear {
-    grid-area:1/1/2/3;
-  }
-  
   #equals {
     grid-area:4/5/6/6;
   }
-  #scr {
-    display:block;
-    background-color:black;
-    color:white;
-    width:400px;
-    height:100px;
-    margin:50px auto 0 auto;
+}
+
+#scr {
+  display:block;
+  position:relative;
+  background-color:black;
+  color:white;
+  width:400px;
+  height:100px;
+  margin:50px auto 0 auto;
+  #operation {
   }
+  #display {
+    display:block;
+    position:absolute;
+    bottom:0%;
+    text-align: right;
+    font-size:2rem;
+  }
+}
