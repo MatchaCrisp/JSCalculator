@@ -4,7 +4,7 @@ import { create, all } from 'mathjs';
 import './index.scss';
 
 const config = {
-  precision: 31
+  precision: 15
 };
 const math = create(all, config);
 //use font awesome if possible
@@ -28,13 +28,19 @@ const Pad = props => {
   });
   const handleKey = e => {
     if (e.keyCode === parseInt(props.keyCode)) {
+      console.log(e.keyCode);
       if (e.keyCode===53) {
+        console.log('test1')
         if (e.shiftKey) {
+          console.log('test2')
           props.handleEvent(props.desc);
         }
       }
-      e.preventDefault();
-      props.handleEvent(props.desc);
+      else {
+        e.preventDefault();
+        props.handleEvent(props.desc);
+      }
+
     }
 
   }
@@ -51,15 +57,15 @@ const Pad = props => {
 }
 
 const App = () => {
-
+  
   return (
     <div id="app">
-      <Calc />
+      <Core />
     </div>
   )
 }
 
-const Calc = () => {
+const Core = () => {
   const [op1, setOp1] = useState('');
   const [oper, setOper] = useState('');
   const [op2, setOp2] = useState('0');
@@ -67,6 +73,14 @@ const Calc = () => {
   const [res, setRes] = useState('');
   const [ey, setEy] = useState(false);
   const [hist, setHist] = useState([]);
+  const [power,setPower]=useState(true);
+  //history
+  const histing=(l,r,o,a)=>{
+    if (hist.length>=20)
+      setHist(hist.concat([[l,r,o,a]]).slice(1));
+    else
+    setHist(hist.concat([[l,r,o,a]]));
+  }
   //only works with both operands and the operator all present
   const calcing = (l,r,o) => {
 
@@ -90,12 +104,19 @@ const Calc = () => {
         else
           ans = (math.divide(opL, opR).toString());
       }
+      else if (o ==='%') {
+        ans = (math.mod(opL,opR).toString());
+      }
+
+      if (ans.length>28) 
+        return 'infinity';
       return ans;
   }
 
   //distribute 
   const handleEvent = e => {
-
+    if (!power)
+      return;
     if (e.length === 1) {
       if (e === '=') {
         handleEnt();
@@ -129,7 +150,7 @@ const Calc = () => {
     console.log(`called handleNum, passed: ${num}`);
 
     //case of complete calculation
-    if (res !== '') {
+    if (res !== '' || op2==='undefined' || op2==='infinity') {
       console.log('new calc with', num);
       setOp1('');
       setOper('');
@@ -144,7 +165,7 @@ const Calc = () => {
         setDec(false);
       }
     }
-    else if (op2.length - (dec ? 1 : 0) < 30) {
+    else if (op2.length - (dec ? 1 : 0) - (ey ? 2:0) < 15) {
       console.log('processing', num);
       //dealing with leading zero
       if (num === '0') {
@@ -189,8 +210,8 @@ const Calc = () => {
   //new refactor stopping point
   const handleArith = op => {
     console.log(`handleArith called ${op}`);
-    if (res==='undefined') {
-      console.log('last result undefined');
+    if (res==='undefined' || res==='infinity' || op2==='undefined' || op2==='infinity') {
+      console.log('last result undefined/infinity');
       setOp1('');
       setOper('');
       setOp2('0');
@@ -258,7 +279,7 @@ const Calc = () => {
           setRes('');
           setDec(false);
           setEy(false);
-          setHist(hist.concat([l.concat(oOld).concat(r).concat('=').concat(rekt)]));
+          histing(l,oOld,r,rekt);
         }
 
       }
@@ -276,7 +297,8 @@ const Calc = () => {
         console.log('full calculation');
         const rekt=calcing(op1,op2,oper);
         setRes(rekt);
-        setHist(hist.concat([op1.concat(oper).concat(op2).concat('=').concat(rekt)]));
+        histing(op1,oper,op2,rekt);
+
 
       }
 
@@ -288,7 +310,7 @@ const Calc = () => {
   const handleSign = () => {
     console.log('handleSign called');
     //case of complete calculation
-    if (res !== '') {
+    if (res !== '' && (res!=='undefined' && res!=='infinity')) {
       const newSign = () => {
         return new Promise((resolve) => {
           setOp1('');
@@ -320,7 +342,7 @@ const Calc = () => {
   const handleEy = () => {
     console.log('handleEy called');
     //only works with existing op2 that is not just a zero
-    if (op2.length > 0) {
+    if (op2.length > 0 && (op2!=='undefined'&&op2!=='infinity')) {
       if (op2[0] !== '0' || (dec && op2.length > 2)) {
         setOp2(op2.concat('e+'));
         setEy(true);
@@ -330,18 +352,35 @@ const Calc = () => {
   //sqrt, squared
   const handleOther = op => {
     console.log(`handleother called`)
-    //only works with existing op2
-    if (op2.length > 0) {
+    //case of complete calculation (not infinity/undefined)
+    if (res!=='' && (res!=='undefined' && res!=='infinity')) {
+      console.log('complete calculation into sqrt/sq');
+      let rem=math.bignumber(res);
+      if (op === 'sqrt') {
+        rem=math.sqrt(rem).toString();
+      }
+      else {
+        rem=math.pow(rem,2).toString();
+      }
+      setOp1('');
+      setOper('');
+      setOp2(rem);
+      setRes('');
+      setDec(false);
+      setEy(rem.includes('e'));
+    }
+    //only works with existing op2 and incomplete calculations
+    else if (op2.length > 0 && (op2!=='undefined'&&op2!=='infinity')) {
       const toCalc = math.bignumber(op2);
       if (op === 'sqrt') {
         const ans = math.sqrt(toCalc).toString();
-        setOp2(ans);
+        setOp2(ans.length>28?'infinity':ans);
         //set sci notation if exists
         setEy(ans.includes('e'));
       }
       else {
         const ans = math.pow(toCalc, 2).toString();
-        setOp2(ans);
+        setOp2(ans.length>28?'infinity':ans);
         //set sci notation if exists
         setEy(ans.includes('e'));
       }
@@ -413,6 +452,14 @@ const Calc = () => {
     }
   }
 
+  //time travel
+  const handleHist = i => {
+    const toSet=hist[i];
+    setOp1(toSet[0]);
+    setOper(toSet[1]);
+    setOp2(toSet[2]);
+    setRes(toSet[3]);
+  }
   //handle backspaces
   //problem of turning op1 back to 2, nd decimals etc
   const handleDel = () => {
@@ -455,22 +502,37 @@ const Calc = () => {
 
 
   }
-  const histStr = hist.map((h, i) => <li key={i}>{h}</li>);
+
   return (
-    <div id="calc">
-      <Display op1={op1}
+    <div id="core">
+      <HistList hist={hist} 
+        handleHist={handleHist}
+        handlePow={setPower}
+        power={power}/>
+      <Calc op1={op1}
         oper={oper}
         op2={op2}
         res={res}
-        hist={hist} />
-      <CalcPad handleEvent={handleEvent} />
-      <ul>
-        {histStr}
-      </ul>
+        hist={hist}
+        handleEvent={handleEvent} />
+
+
+
     </div>
   )
 }
-
+const Calc = props => {
+  return (
+    <div id="core">
+      <Display op1={props.op1}
+        oper={props.oper}
+        op2={props.op2}
+        res={props.res}
+        hist={props.hist} />
+      <CalcPad handleEvent={props.handleEvent} />
+    </div>
+  )
+}
 const Display = props => {
   let dispStr = '';
   let disp = '';
@@ -490,7 +552,8 @@ const Display = props => {
       <div id='operation'>
         <p>{dispStr}</p>
       </div>
-      <div id="display">
+      <div id="display" 
+           style={{fontSize:disp.length>16?'1rem':'2rem'}}>
         <p>{disp}</p>
       </div>
     </div>
@@ -526,6 +589,58 @@ const CalcPad = props => {
     </div>
   )
 }
+
+const HistList = props => {
+  //expand
+  const handleExp=()=>{
+    props.handlePow(!props.power);
+  }
+  //hashing for better key
+  const renderHist = (histI,ind) => <History
+    ind = {ind}
+    key = {ind}
+    hist = {histI}
+    handleHist = {props.handleHist}
+    />
+  const jsx = props.hist.map((histI,ind)=>renderHist(histI,ind));
+  return (
+    <div id="histList">
+      {jsx}
+      <div id="roller" onClick={handleExp}></div>
+    </div>
+  )
+}
+
+const History = props => {
+  const handleClick=()=>{
+    props.handleHist(props.ind);
+  }
+  const genHist=()=>{
+    const truncator=str=>{
+      if (str.includes('e')) {
+        const toTrun = str.split('e');
+        toTrun[0]=toTrun[0].slice(0,15-toTrun[1].length-3)+'...';
+        return toTrun.join('e');
+      }
+      return str;
+
+    }
+    let str=props.hist[0].length>15?truncator(props.hist[0]):props.hist[0];
+    str+=` ${props.hist[1]} `;
+    str+=props.hist[2].length>15?truncator(props.hist[2]):props.hist[2];
+    str+=' = ';
+    str+=props.hist[3].length>15?truncator(props.hist[3]):props.hist[3];
+
+    return str;
+  }
+  const jsx=genHist();
+  return (
+    <div onClick={handleClick}
+      className='histItem'>
+      <p>{jsx}</p>
+    </div>
+  )
+} 
 ReactDOM.render(
   <App />,
   document.getElementById('root')

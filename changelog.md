@@ -50,13 +50,13 @@
  * calculation history
  * history change
 
- # v0.5 MVP
- ## new
-  * FCC compliant calculations
-  * refactored (to best of ability)
-  * calculation history
-  * modulo function
-  * fixed:
+# v0.5 MVP
+## new
+ * FCC compliant calculations
+ * refactored (to best of ability)
+ * calculation history
+ * modulo function
+ * fixed:
    * issue of state changes dependent on previous states, resulting in fast calculations generating unpredictable results
    * issue of negative sign being seen as a valid operand
    * issue of recording history reflecting inaccurate/incomplete calculations
@@ -64,3 +64,26 @@
 ### to do
  * SCSS
  * history change (time travel)
+ * fix scientific notation not being properly counted in digit limit
+ * truncation of numbers displayed in history
+ * fix 30 digits too large to fit on display
+ * add history size limit (20 perhaps?)
+
+# v0.6 Feature update
+## new
+ * history change
+ * scientific notation now properly added to digit limit
+ * fixed sqrt/pow behavior on complete calculations
+ * added dynamic font-size for extremely large numbers
+ * added infinity for numbers with 10+ digits after e
+ * added appropriate response to undefined/infinity as op2/res
+ * added history number truncation
+ * added history size limit
+
+## in progress
+ * collapsible history (mobile only)
+
+### to do
+ * SCSS
+ * responsive design
+
