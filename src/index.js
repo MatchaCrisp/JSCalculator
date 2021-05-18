@@ -57,15 +57,20 @@ const Pad = props => {
 }
 
 const App = () => {
-  
+  const [power,setPower]=useState(true);
+  const handlePow=()=>{
+    setPower(!power);
+  }
   return (
     <div id="app">
-      <Core />
+      <Core handlePow={handlePow}
+            power={power}/>
+      <div id="drop" style={{display:power?'none':'block'}}/>
     </div>
   )
 }
 
-const Core = () => {
+const Core = props => {
   const [op1, setOp1] = useState('');
   const [oper, setOper] = useState('');
   const [op2, setOp2] = useState('0');
@@ -73,7 +78,7 @@ const Core = () => {
   const [res, setRes] = useState('');
   const [ey, setEy] = useState(false);
   const [hist, setHist] = useState([]);
-  const [power,setPower]=useState(true);
+
   //history
   const histing=(l,r,o,a)=>{
     if (hist.length>=20)
@@ -115,7 +120,7 @@ const Core = () => {
 
   //distribute 
   const handleEvent = e => {
-    if (!power)
+    if (!props.power)
       return;
     if (e.length === 1) {
       if (e === '=') {
@@ -507,8 +512,8 @@ const Core = () => {
     <div id="core">
       <HistList hist={hist} 
         handleHist={handleHist}
-        handlePow={setPower}
-        power={power}/>
+        handlePow={props.handlePow}
+        power={props.power}/>
       <Calc op1={op1}
         oper={oper}
         op2={op2}
@@ -523,7 +528,7 @@ const Core = () => {
 }
 const Calc = props => {
   return (
-    <div id="core">
+    <div id="calc">
       <Display op1={props.op1}
         oper={props.oper}
         op2={props.op2}
@@ -592,6 +597,13 @@ const CalcPad = props => {
 
 const HistList = props => {
   //expand
+  const transSty={
+    transition:'height 500ms ease-in'
+  };
+  const hSty={
+    long:'420px',
+    short:'40px'
+  }
   const handleExp=()=>{
     props.handlePow(!props.power);
   }
@@ -602,9 +614,25 @@ const HistList = props => {
     hist = {histI}
     handleHist = {props.handleHist}
     />
+  
+  const makeJsx=()=>{
+    let temp;
+    if (props.hist) {
+      if (props.power) {
+        temp=renderHist(props.hist[props.hist.length-1],props.hist.length-1);
+      }
+      else {
+        temp=props.hist.map((histI,ind)=>renderHist(histI,ind));
+      }
+    }
+    else {
+      temp='';
+    }
+    return temp;
+  }
   const jsx = props.hist.map((histI,ind)=>renderHist(histI,ind));
   return (
-    <div id="histList">
+    <div id="histList" style={{...transSty,height:props.power?hSty.short:hSty.long}}>
       {jsx}
       <div id="roller" onClick={handleExp}></div>
     </div>

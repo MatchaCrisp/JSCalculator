@@ -81,7 +81,7 @@
  * added history size limit
 
 ## in progress
- * collapsible history (mobile only)
+ * collapsible history (mobile only, how to display only last item while collapsed, how to ensure all items fit when expanded)
 
 ### to do
  * SCSS
