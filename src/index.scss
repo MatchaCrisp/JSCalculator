@@ -1,23 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pangolin&display=swap');
 //app
-$bac-img:'url';
+$bac-img:'https://i.pinimg.com/originals/02/4c/b4/024cb4c9894df2b015e9d80131b4f1ec.jpg';
 
 //history
-$his-bac-col:black;
-$his-txt-col:black;
+$his-bac-col:#ffffef;
+$his-txt-col:rgb(22, 22, 22);
+$his-hov-col:rgb(100, 99, 99);
 
 //calculator
-$scr-col:black;
-$cal-col:black;
+$scr-bac-col:black;
+$scr-txt-col:black;
+$cal-bac-col:rgb(136, 136, 136);
+$cal-acc-col:rgb(172, 172, 172);
 
 //buttons
 $dan-but-col:red;
-$num-but-col:black;
-$ope-but-col:yellow;
-$ent-but-col:blue;
 $dan-txt-col:black;
-$num-txt-col:black;
+
+$num-but-col:gainsboro;
+$num-txt-col:gray;
+
+$ope-but-col:yellow;
 $ope-txt-col:black;
+
+$ent-but-col:blue;
 $ent-txt-col:black;
 
 html {
@@ -34,61 +41,76 @@ html {
 #app {
   height:100vh;
   width:100vw;
-  background-color:#beceff;
+  background-image:url($bac-img);
+  background-size:cover;
+  //for when power is off
   #drop {
     position:absolute;
     z-index:5;
     top:0;
     left:0;
-    filter:opacity(50%);
     background-color:gray;
+    filter:opacity(50%);
     height:100%;
     width:100%;
   }
+  //contains history/calculator itself
   #core {
     position:relative;
     margin:0 auto;
     height:100%;
     width:400px;
     #calc {
+      -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Old versions of Firefox */
+         -ms-user-select: none; /* Internet Explorer/Edge */
+             user-select: none;
+
       position:absolute;
       left: 50%; 
       top: 50%;
       transform: translate(-50%, -50%);
+
       height:500px;
       width:100%;
+
+      background-color:$cal-bac-col;
+      border:$cal-acc-col 1px solid;
     }
   }
 }
 
 //input pad
 #calcPad {
-  height:400px;
-  width:100%;
+  position:relative;
+  margin:10px;
+  height:380px;
+  width:380px;
+
   display:grid;
   grid-template: repeat(5,1fr) / repeat(5,1fr);
   grid-gap:5px;
+  #equals {
+    grid-area:4/5/6/6;
+  }
+  //main interactible class (applies to all button)
   .int {
     display:flex;
     align-items:center;
     justify-content:center;
     cursor:pointer;
-    user-select:none;
-    -webkit-user-select:none;
-    -moz-user-select:none;
-    -ms-user-select:none;
   }
+  //0-9, decimal, sign
   .num {
-    background-color:gainsboro;
-    color:gray;
+    background-color:$num-but-col;
+    color:$num-txt-col;
   }
+  //ac, ce, del
   .dang {
     background-color:maroon;
     color:yellow;
   }
-  .opt {
-    background-color:beige;
-  }
+  //+ - * / pow sqrt e
   .oper {
     background-color:yellow;
   }
@@ -96,9 +118,7 @@ html {
     background-color:blue;
     color:gray;
   }
-  #equals {
-    grid-area:4/5/6/6;
-  }
+
 }
 
 //display
@@ -122,25 +142,56 @@ html {
 
 //history
 #histList {
+  line-height:1.2rem;
+  font-family: 'Pangolin', cursive;
+
   position:relative;
   z-index:11;
   height:40px;
   width:100%;
+
   overflow:hidden;
-  background-color:#ffffef;
-  box-shadow:0px 10px 10px #CCC;
+
+  background-color:$his-bac-col;
+  color:$his-txt-col;
+  background-image:linear-gradient(rgb(214, 211, 211) .1rem, transparent .1rem);
+  background-size: 100% 1.2rem;
+
+  //'past calculations'
+  #histHeader {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Old versions of Firefox */
+     -ms-user-select: none; /* Internet Explorer/Edge */
+         user-select: none;
+  }
+  //each individual clickable history item
   .histItem {
     cursor: pointer;
+    &:hover {
+      color:$his-hov-col;
+    }
   }
+  //clickable roller at bottom of history to expand/collapse history
   #roller {
+    cursor: pointer;
+    text-align:center;
+    user-select: none;
+      -webkit-user-select: none; /* Safari */
+      -moz-user-select: none; /* Old versions of Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+
     position:absolute;
     bottom:0px;
     left:0;
     z-index:15;
-    background-color:#ffffdf;
-    box-shadow:inset 0px 11px 8px -10px gray, inset 0px -11px 8px -10px gray;
     height:20px;
     width:100%;
-    cursor: pointer;
+
+    background-color:#ffffdf;
+    box-shadow:inset 0px 11px 8px -10px gray, inset 0px -11px 8px -10px gray;
+
+    &:hover {
+      color:$his-hov-col;
+    }
   }
 }

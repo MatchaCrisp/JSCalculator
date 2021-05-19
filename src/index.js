@@ -58,14 +58,17 @@ const Pad = props => {
 
 const App = () => {
   const [power,setPower]=useState(true);
-  const handlePow=()=>{
-    setPower(!power);
+  const handlePow=(e)=>{
+    if (e)
+      setPower(e);
+    else
+      setPower(!power);
   }
   return (
     <div id="app">
       <Core handlePow={handlePow}
             power={power}/>
-      <div id="drop" style={{display:power?'none':'block'}}/>
+      <div id="drop" style={{display:power?'none':'block'}} onClick={()=>handlePow(true)}/>
     </div>
   )
 }
@@ -596,16 +599,22 @@ const CalcPad = props => {
 }
 
 const HistList = props => {
+  const upAr=<i class="fas fa-arrow-up" />;
+  const downAr=<i class="fas fa-arrow-down" />;
   //expand
   const transSty={
-    transition:'height 500ms ease-in'
+    transition:'height 200ms ease-in'
   };
   const hSty={
     long:'420px',
     short:'40px'
-  }
+  };
+  const bSty={
+    on:'0px 0px 10px #CCC',
+    off:'none'
+  };
   const handleExp=()=>{
-    props.handlePow(!props.power);
+    props.handlePow();
   }
   //hashing for better key
   const renderHist = (histI,ind) => <History
@@ -613,28 +622,16 @@ const HistList = props => {
     key = {ind}
     hist = {histI}
     handleHist = {props.handleHist}
+    handleExp= {handleExp}
     />
-  
-  const makeJsx=()=>{
-    let temp;
-    if (props.hist) {
-      if (props.power) {
-        temp=renderHist(props.hist[props.hist.length-1],props.hist.length-1);
-      }
-      else {
-        temp=props.hist.map((histI,ind)=>renderHist(histI,ind));
-      }
-    }
-    else {
-      temp='';
-    }
-    return temp;
-  }
-  const jsx = props.hist.map((histI,ind)=>renderHist(histI,ind));
+
+  const jsx = [<div id="histHeader">Past Calculations</div>,...props.hist.map((histI,ind)=>renderHist(histI,ind))];
   return (
-    <div id="histList" style={{...transSty,height:props.power?hSty.short:hSty.long}}>
+    <div id="histList" style={{...transSty,
+                          height:props.power?hSty.short:hSty.long,
+                          boxShadow:props.power?bSty.off:bSty.on}}>
       {jsx}
-      <div id="roller" onClick={handleExp}></div>
+      <div id="roller" onClick={handleExp}>{props.power?downAr:upAr}</div>
     </div>
   )
 }
@@ -642,6 +639,7 @@ const HistList = props => {
 const History = props => {
   const handleClick=()=>{
     props.handleHist(props.ind);
+    props.handleExp(true);
   }
   const genHist=()=>{
     const truncator=str=>{
