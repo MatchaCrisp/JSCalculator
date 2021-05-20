@@ -599,8 +599,8 @@ const CalcPad = props => {
 }
 
 const HistList = props => {
-  const upAr=<i class="fas fa-arrow-up" />;
-  const downAr=<i class="fas fa-arrow-down" />;
+  const upAr=<i className="fas fa-arrow-up" />;
+  const downAr=<i className="fas fa-arrow-down" />;
   //expand
   const transSty={
     transition:'height 200ms ease-in'
@@ -624,8 +624,8 @@ const HistList = props => {
     handleHist = {props.handleHist}
     handleExp= {handleExp}
     />
-
-  const jsx = [<div id="histHeader">Past Calculations</div>,...props.hist.map((histI,ind)=>renderHist(histI,ind))];
+ 
+  const jsx = [<div id="histHeader" key="-1">Past Calculations</div>,...props.hist.map((histI,ind)=>renderHist(histI,ind))];
   return (
     <div id="histList" style={{...transSty,
                           height:props.power?hSty.short:hSty.long,

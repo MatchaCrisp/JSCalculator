@@ -5,27 +5,32 @@ $bac-img:'https://i.pinimg.com/originals/02/4c/b4/024cb4c9894df2b015e9d80131b4f1
 
 //history
 $his-bac-col:#ffffef;
+$his-acc-col:rgb(214, 211, 211);
 $his-txt-col:rgb(22, 22, 22);
 $his-hov-col:rgb(100, 99, 99);
 
 //calculator
 $scr-bac-col:black;
-$scr-txt-col:black;
-$cal-bac-col:rgb(136, 136, 136);
+$scr-txt-col:white;
+$cal-bac-col:black;
 $cal-acc-col:rgb(172, 172, 172);
 
 //buttons
-$dan-but-col:red;
-$dan-txt-col:black;
+$dan-but-col:maroon;
+$dan-acc-col:rgb(102, 0, 0);
+$dan-txt-col:rgb(168, 152, 7);
 
 $num-but-col:gainsboro;
+$num-acc-col:rgb(182, 182, 182);
 $num-txt-col:gray;
 
 $ope-but-col:yellow;
+$ope-acc-col:rgb(212, 212, 0);
 $ope-txt-col:black;
 
 $ent-but-col:blue;
-$ent-txt-col:black;
+$ent-acc-col:rgb(0, 0, 214);
+$ent-txt-col:gray;
 
 html {
   font-size:16px;
@@ -76,6 +81,7 @@ html {
 
       background-color:$cal-bac-col;
       border:$cal-acc-col 1px solid;
+      border-radius: 5px;
     }
   }
 }
@@ -102,21 +108,22 @@ html {
   }
   //0-9, decimal, sign
   .num {
-    background-color:$num-but-col;
+    background:linear-gradient(45deg, $num-but-col, $num-acc-col);
     color:$num-txt-col;
   }
   //ac, ce, del
   .dang {
-    background-color:maroon;
-    color:yellow;
+    background:linear-gradient(45deg, $dan-but-col, $dan-acc-col);
+    color:$dan-txt-col;
   }
   //+ - * / pow sqrt e
   .oper {
-    background-color:yellow;
+    background:linear-gradient(45deg, $ope-but-col, $ope-acc-col);
+    color:$ope-txt-col;
   }
   .enter {
-    background-color:blue;
-    color:gray;
+    background:linear-gradient(45deg, $ent-but-col, $ent-acc-col);
+    color:$ent-txt-col;
   }
 
 }
@@ -127,8 +134,9 @@ html {
   position:relative;
   background-color:black;
   color:white;
-  width:100%;
-  height:100px;
+  width:390px;
+  height:90px;
+  margin:5px;
   #operation {
   }
   #display {
@@ -147,14 +155,13 @@ html {
 
   position:relative;
   z-index:11;
-  height:40px;
   width:100%;
 
   overflow:hidden;
 
   background-color:$his-bac-col;
   color:$his-txt-col;
-  background-image:linear-gradient(rgb(214, 211, 211) .1rem, transparent .1rem);
+  background-image:linear-gradient($his-acc-col .1rem, transparent .1rem);
   background-size: 100% 1.2rem;
 
   //'past calculations'
@@ -167,6 +174,8 @@ html {
   //each individual clickable history item
   .histItem {
     cursor: pointer;
+
+    border-radius:2px;
     &:hover {
       color:$his-hov-col;
     }
