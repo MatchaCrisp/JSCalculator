@@ -7,8 +7,35 @@ const config = {
   precision: 15
 };
 const math = create(all, config);
+
+//hook for tracking viewport size
+const useWindDim=()=>{
+  const getWindDim=()=>{
+    const {innerWidth:w,innerHeight:h}=window;
+    return {w,h};
+  }
+  const handleResize=()=>{
+    setWindDim(getWindDim());
+  }
+  //initialize to viewport size on open
+  const [windDim,setWindDim]=useState(getWindDim());
+
+  //add listener for resize on mount/remove on unmount
+  useEffect(()=>{
+    window.addEventListener('resize',handleResize);
+    return ()=>window.removeEventListener('resize',handleResize);
+  });
+
+  return windDim;
+}
+
 //use font awesome if possible
 const Pad = props => {
+  const transSty={
+    transition:'all 50ms ease-in-out'
+  }
+  const [act,setAct]=useState(false);
+
   let dispTxt;
   if (props.desc === "pow")
     dispTxt = <p>x<sup>2</sup></p>;
@@ -28,6 +55,7 @@ const Pad = props => {
   });
   const handleKey = e => {
     if (e.keyCode === parseInt(props.keyCode)) {
+      handleAct();
       console.log(e.keyCode);
       if (e.keyCode===53) {
         console.log('test1')
@@ -45,10 +73,18 @@ const Pad = props => {
 
   }
   const handleClick = () => {
+    handleAct();
     props.handleEvent(props.desc);
   }
+
+  const handleAct = async()=>{
+    setAct(true);
+    await new Promise((resolve)=>setTimeout(resolve,100));
+    setAct(false);
+  }
   return (
-    <div className={props.className}
+    <div className={`${props.className} ${act?'clicked':''}`}
+      style={{...transSty}}
       id={props.id}
       onClick={handleClick}>
       {dispTxt}
@@ -59,11 +95,11 @@ const Pad = props => {
 const App = () => {
   const [power,setPower]=useState(true);
   const handlePow=(e)=>{
-    if (e)
+    if (typeof(e)==='boolean')
       setPower(e);
     else
       setPower(!power);
-  }
+  } 
   return (
     <div id="app">
       <Core handlePow={handlePow}
@@ -81,7 +117,22 @@ const Core = props => {
   const [res, setRes] = useState('');
   const [ey, setEy] = useState(false);
   const [hist, setHist] = useState([]);
+  const {h,w}=useWindDim();
 
+  //responsive
+  const mobSty={
+    width:'400px',
+    height:'100%',
+    margin:'0 auto'
+  }
+
+  const bigSty={
+    width:'900px',
+    height:'500px',
+    display:'flex',
+    top:`${Math.max((h-500)/2,0)}px`,
+    left:`${Math.max((w-900)/2,0)}px`
+  }
   //history
   const histing=(l,r,o,a)=>{
     if (hist.length>=20)
@@ -512,12 +563,18 @@ const Core = props => {
   }
 
   return (
-    <div id="core">
+    <div id="core"
+      style={w>900?{...bigSty}:{...mobSty}}>
       <HistList hist={hist} 
+        h={h}
+        w={w}
         handleHist={handleHist}
         handlePow={props.handlePow}
         power={props.power}/>
-      <Calc op1={op1}
+      <Calc 
+        h={h}
+        w={w}
+        op1={op1}
         oper={oper}
         op2={op2}
         res={res}
@@ -530,8 +587,18 @@ const Core = props => {
   )
 }
 const Calc = props => {
+  const bigSty={
+    position:'relative',
+    marginLeft:'100px'
+  }
+  const mobSty={
+    position:'absolute',
+    top:`${Math.max((props.h-540)/2+40,40)}px`
+  }
+
   return (
-    <div id="calc">
+    <div id="calc"
+          style={props.w>900?{...bigSty}:{...mobSty}}>
       <Display op1={props.op1}
         oper={props.oper}
         op2={props.op2}
@@ -601,20 +668,19 @@ const CalcPad = props => {
 const HistList = props => {
   const upAr=<i className="fas fa-arrow-up" />;
   const downAr=<i className="fas fa-arrow-down" />;
+
   //expand
-  const transSty={
-    transition:'height 200ms ease-in'
+  const mobSty={
+    transition:'height 200ms ease-in',
+    height:props.power?'40px':'540px',
+    boxShadow:props.power?'none':'0px 0px 10px #CCC'
   };
-  const hSty={
-    long:'420px',
-    short:'40px'
-  };
-  const bSty={
-    on:'0px 0px 10px #CCC',
-    off:'none'
-  };
-  const handleExp=()=>{
-    props.handlePow();
+
+  const bigSty={
+    height:`${Math.min(500,props.h)}px`
+  }
+  const handleExp=e=>{
+    props.handlePow(e);
   }
   //hashing for better key
   const renderHist = (histI,ind) => <History
@@ -624,19 +690,21 @@ const HistList = props => {
     handleHist = {props.handleHist}
     handleExp= {handleExp}
     />
- 
+
   const jsx = [<div id="histHeader" key="-1">Past Calculations</div>,...props.hist.map((histI,ind)=>renderHist(histI,ind))];
   return (
-    <div id="histList" style={{...transSty,
-                          height:props.power?hSty.short:hSty.long,
-                          boxShadow:props.power?bSty.off:bSty.on}}>
+    <div id="histList" style={props.w>900?{...bigSty}:{...mobSty}}>
       {jsx}
-      <div id="roller" onClick={handleExp}>{props.power?downAr:upAr}</div>
+      <div id="roller" 
+      onClick={props.w<=900?props.handlePow:undefined}
+      style={{cursor:props.w>900?'default':'pointer'}}
+      >{props.w<=900?props.power?downAr:upAr:''}</div>
     </div>
   )
 }
 
 const History = props => {
+
   const handleClick=()=>{
     props.handleHist(props.ind);
     props.handleExp(true);

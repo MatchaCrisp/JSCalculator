@@ -87,3 +87,13 @@
  * SCSS
  * responsive design
 
+# v0.7 almost release
+## new
+ * responsive design (react based) at 900px breakpoint
+ * collapsible history at below 900px
+
+## to do
+ * source bg img
+ * proper color scheme
+ * test max history size and how it fits 
+
