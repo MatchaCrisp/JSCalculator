@@ -4,37 +4,32 @@
 $bac-img:'https://i.pinimg.com/originals/02/4c/b4/024cb4c9894df2b015e9d80131b4f1ec.jpg';
 
 //history
-$his-bac-col:#ffffef;
-$his-acc-col:rgb(214, 211, 211);
-$his-txt-col:rgb(22, 22, 22);
-$his-hov-col:rgb(100, 99, 99);
+$his-bac-col:#313131;
+$his-acc-col:rgb(0, 0, 0);
+$his-txt-col:rgb(163, 163, 163);
+$his-hov-col:rgb(199, 199, 199);
 
 //calculator
 $scr-bac-col:black;
 $scr-txt-col:white;
 $cal-bac-col:black;
-$cal-acc-col:rgb(172, 172, 172);
+$cal-acc-col:rgb(59, 54, 54);
 
 //buttons
-$dan-but-col:maroon;
-$dan-acc-col:rgb(102, 0, 0);
-$dan-txt-col:rgb(168, 152, 7);
+$but-col:rgb(37, 37, 37);
+$acc-col:rgb(65, 65, 65);
 
-$num-but-col:gainsboro;
-$num-acc-col:rgb(182, 182, 182);
-$num-txt-col:gray;
+$dan-txt-col:rgb(197, 63, 63);
 
-$ope-but-col:yellow;
-$ope-acc-col:rgb(212, 212, 0);
-$ope-txt-col:black;
+$num-txt-col:rgb(163, 163, 163);
 
-$ent-but-col:blue;
-$ent-acc-col:rgb(0, 0, 214);
-$ent-txt-col:gray;
+$ope-txt-col:rgb(197, 186, 84);
 
+$ent-txt-col:rgb(127, 112, 194);
+
+//preset
 html {
   font-size:16px;
-
   font-family: 'Orbitron', sans-serif;
 
 }
@@ -48,7 +43,8 @@ html {
 #app {
   height:100vh;
   width:100vw;
-  background-color:green;
+  background-image:url("img/bg2.jpg");
+  background-size:cover;
   //for when power is off
   #drop {
     position:absolute;
@@ -63,7 +59,7 @@ html {
   //contains history/calculator itself
   #core {
     position:relative;
-
+    //calculator
     #calc {
       -webkit-user-select: none; /* Safari */
         -moz-user-select: none; /* Old versions of Firefox */
@@ -76,7 +72,7 @@ html {
       width:400px;
 
       background-color:$cal-bac-col;
-      border:$cal-acc-col 1px solid;
+      border:$cal-acc-col 3px solid;
       border-radius: 5px;
     }
   }
@@ -97,6 +93,7 @@ html {
   }
   //main interactible class (applies to all button)
   .int {
+    transition:all 50ms ease-in-out;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -105,21 +102,21 @@ html {
   }
   //0-9, decimal, sign
   .num {
-    background:linear-gradient(45deg, $num-but-col, $num-acc-col);
+    background:linear-gradient(45deg, $but-col, $acc-col);
     color:$num-txt-col;
   }
   //ac, ce, del
   .dang {
-    background:linear-gradient(45deg, $dan-but-col, $dan-acc-col);
+    background:linear-gradient(45deg, $but-col, $acc-col);
     color:$dan-txt-col;
   }
   //+ - * / pow sqrt e
   .oper {
-    background:linear-gradient(45deg, $ope-but-col, $ope-acc-col);
+    background:linear-gradient(45deg, $but-col, $acc-col);
     color:$ope-txt-col;
   }
   .enter {
-    background:linear-gradient(45deg, $ent-but-col, $ent-acc-col);
+    background:linear-gradient(45deg, $but-col, $acc-col);
     color:$ent-txt-col;
   }
 
@@ -131,15 +128,16 @@ html {
   position:relative;
   background-color:black;
   color:white;
-  width:390px;
+  width:380px;
   height:90px;
-  margin:5px;
+  margin:5px auto;
   #operation {
   }
   #display {
     display:block;
     position:absolute;
-    bottom:0%;
+    bottom:0;
+    right:0;
     text-align: right;
     font-size:2rem;
   }
@@ -176,6 +174,9 @@ html {
     &:hover {
       color:$his-hov-col;
     }
+    .hisRes {
+      text-align:right;
+    }
   }
   //clickable roller at bottom of history to expand/collapse history
   #roller {
@@ -193,8 +194,8 @@ html {
     height:20px;
     width:100%;
 
-    background-color:#ffffdf;
-    box-shadow:inset 0px 11px 8px -10px gray, inset 0px -11px 8px -10px gray;
+    background-color:$his-bac-col;
+    box-shadow:inset 0px 11px 8px -10px black, inset 0px -11px 8px -10px black;
 
     &:hover {
       color:$his-hov-col;

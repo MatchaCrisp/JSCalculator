@@ -3,8 +3,11 @@ import ReactDOM from 'react-dom';
 import { create, all } from 'mathjs';
 import './index.scss';
 
+//dig. lim.
+const digLim=22;
+//sig. dig.
 const config = {
-  precision: 15
+  precision: digLim
 };
 const math = create(all, config);
 
@@ -31,11 +34,11 @@ const useWindDim=()=>{
 
 //use font awesome if possible
 const Pad = props => {
-  const transSty={
-    transition:'all 50ms ease-in-out'
-  }
+
+  //if activated (100ms glow)
   const [act,setAct]=useState(false);
 
+  //button display text
   let dispTxt;
   if (props.desc === "pow")
     dispTxt = <p>x<sup>2</sup></p>;
@@ -44,39 +47,47 @@ const Pad = props => {
   else if (props.desc === "sign")
     dispTxt = <p>+/-</p>;
   else if (props.desc === "bksp")
-    dispTxt = <i className="fas fa-backspace"></i>
+    dispTxt = <i className="fas fa-backspace"></i>;
+  else if (props.desc==="e")
+    dispTxt=<p>EE</p>;
   else
     dispTxt = <p>{props.desc}</p>;
 
+  //add keydown event listener on mount/remove on unmount (only if keycode exists in json)
   useEffect(() => {
     if (props.keyCode === "") return;
     document.addEventListener('keydown', handleKey);
     return () => { document.removeEventListener('keydown', handleKey) };
   });
+
+  //when keydown
   const handleKey = e => {
+    //check if this is pressed
     if (e.keyCode === parseInt(props.keyCode)) {
+      //animation
       handleAct();
-      console.log(e.keyCode);
+      //make sure % works but not 5 for modulo operator
       if (e.keyCode===53) {
-        console.log('test1')
-        if (e.shiftKey) {
-          console.log('test2')
+        if (e.shiftKey)
           props.handleEvent(props.desc);
-        }
       }
+      //prevent default behaviors (/ opening quick search on firefox etc) then pass descriptor to be processed
       else {
         e.preventDefault();
         props.handleEvent(props.desc);
       }
-
     }
-
   }
+
+  //when clicked
   const handleClick = () => {
+    //animation
     handleAct();
+    //pass descriptor to be processed
     props.handleEvent(props.desc);
   }
 
+  //100 ms glow animation effect on activation
   const handleAct = async()=>{
     setAct(true);
     await new Promise((resolve)=>setTimeout(resolve,100));
@@ -84,7 +95,6 @@ const Pad = props => {
   }
   return (
     <div className={`${props.className} ${act?'clicked':''}`}
-      style={{...transSty}}
       id={props.id}
       onClick={handleClick}>
       {dispTxt}
@@ -92,58 +102,89 @@ const Pad = props => {
   )
 }
 
+//background & on/off
+//contains core & gray backdrop when power off
 const App = () => {
+  const {h,w}=useWindDim();
+  //when off, no input on calculator is registered
+  //off only when in mobile and history is expanded
   const [power,setPower]=useState(true);
+  //either switch to opposite state, or if given boolean parameter, set to that boolean
   const handlePow=(e)=>{
     if (typeof(e)==='boolean')
       setPower(e);
     else
       setPower(!power);
   } 
+  useEffect(()=>{
+    if (w<=900)
+      return;
+    setPower(true);
+  },[w])
+  //gray backdrop that covers screen when power off
   return (
     <div id="app">
       <Core handlePow={handlePow}
-            power={power}/>
+            power={power}
+            h={h}
+            w={w}/>
       <div id="drop" style={{display:power?'none':'block'}} onClick={()=>handlePow(true)}/>
     </div>
   )
 }
 
+//calculation core
+//contains history & calc
 const Core = props => {
+  //left operand
   const [op1, setOp1] = useState('');
+  //operator
   const [oper, setOper] = useState('');
+  //right operand
   const [op2, setOp2] = useState('0');
+  //if decimal 
   const [dec, setDec] = useState(false);
+  //calculation result
   const [res, setRes] = useState('');
+  //sci notation
   const [ey, setEy] = useState(false);
+  //array of past history
   const [hist, setHist] = useState([]);
-  const {h,w}=useWindDim();
 
-  //responsive
+  //responsive (mobile)
   const mobSty={
     width:'400px',
     height:'100%',
     margin:'0 auto'
   }
 
+  //responsive (desktop)
   const bigSty={
     width:'900px',
     height:'500px',
     display:'flex',
-    top:`${Math.max((h-500)/2,0)}px`,
-    left:`${Math.max((w-900)/2,0)}px`
+    top:`${Math.max((props.h-500)/2,0)}px`,
+    left:`${Math.max((props.w-900)/2,0)}px`
   }
-  //history
-  const histing=(l,r,o,a)=>{
-    if (hist.length>=20)
-      setHist(hist.concat([[l,r,o,a]]).slice(1));
-    else
-    setHist(hist.concat([[l,r,o,a]]));
-  }
-  //only works with both operands and the operator all present
-  const calcing = (l,r,o) => {
 
-      console.log('calcing was called, using op1: ', l, 'op2: ', r, 'oper: ', o);
+  const getUnique=()=>{
+    const d = new Date();
+    return d.getMilliseconds().toString(16)+d.getDate().toString(16)+d.getMinutes().toString(16);
+  }
+  //record calculation to history when given all 4 parameters (max history size 15)
+  const histing=(l,r,o,a)=>{
+    const u=getUnique();
+    if (hist.length>=13)
+      setHist(hist.concat([[l,r,o,a,u]]).slice(1));
+    else
+    setHist(hist.concat([[l,r,o,a,u]]));
+  }
+  //calculate result given operands and operator
+  const calcing = (l,r,o) => {
+    if (l==='infinity' || r==='infinity')
+      return 'infinity';
+
+    //convert string to bignumber 
       const opL = math.bignumber(l);
       const opR = math.bignumber(r);
       let ans='';
@@ -167,12 +208,13 @@ const Core = props => {
         ans = (math.mod(opL,opR).toString());
       }
 
+      //if answer is too big (15 sig. dig. plus 'e+' plus decimal point leaves 10 digits for after e+)
       if (ans.length>28) 
         return 'infinity';
       return ans;
   }
 
-  //distribute 
+  //distribute passed action to appropraite handler
   const handleEvent = e => {
     if (!props.power)
       return;
@@ -206,11 +248,11 @@ const Core = props => {
 
   //0-9 & decimal
   const handleNum = num => {
-    console.log(`called handleNum, passed: ${num}`);
 
-    //case of complete calculation
+
+    //case of complete calculation, or undefined/infinity as part of operand
+    //clear all, then process given input
     if (res !== '' || op2==='undefined' || op2==='infinity') {
-      console.log('new calc with', num);
       setOp1('');
       setOper('');
       setRes('');
@@ -224,8 +266,8 @@ const Core = props => {
         setDec(false);
       }
     }
-    else if (op2.length - (dec ? 1 : 0) - (ey ? 2:0) < 15) {
-      console.log('processing', num);
+    //max digit: 15
+    else if (op2.length - (dec ? 1 : 0) - (ey ? 2:0) < digLim) {
       //dealing with leading zero
       if (num === '0') {
         //case of no number & case of decimal point present
@@ -265,12 +307,11 @@ const Core = props => {
 
   }
 
-  //+ - * /
-  //new refactor stopping point
+  //+ - * / %
   const handleArith = op => {
-    console.log(`handleArith called ${op}`);
+    //case operand undefined/infinity or result undefined/infinity
+    //clear all
     if (res==='undefined' || res==='infinity' || op2==='undefined' || op2==='infinity') {
-      console.log('last result undefined/infinity');
       setOp1('');
       setOper('');
       setOp2('0');
@@ -279,8 +320,8 @@ const Core = props => {
       setEy(false);
     }
     //case of complete calculation
+    //half fill calculation with prev result as left operand, and given input as operator
     else if (res !== '') {
-      console.log('complete calculation into new arith');
       const rem = res;
       setOp1(rem);
       setOper(op);
@@ -288,7 +329,6 @@ const Core = props => {
       setRes('');
       setDec(false);
       setEy(false);
-
     }
     //no operators
     else if (oper === '') {
@@ -311,11 +351,11 @@ const Core = props => {
     else {
       //case of no existing op2, or op2 is just a negative sign
       if (op2.length === 0||op2[op2.length-1]==='-') {
-        //case of another - operator
+        //case of - operator, swap pos/neg
         if (op==='-') {
           handleSign();
         }
-        //case of other operators
+        //case of other operators (clear possible lone negative sign)
         else {
           setOper(op);
           setOp2('');
@@ -326,7 +366,7 @@ const Core = props => {
       else {
         //either no scientific notation, or a complete sci not (number must exist after e+) and its not just a - sign
         if ((!ey || op2[op2.length - 1] !== '+') && op2[op2.length - 1] !== '-') {
-          console.log('calculate then move new arith')
+
           const oOld=oper;
           const l=op1;
           const r=op2;
@@ -348,61 +388,57 @@ const Core = props => {
 
   // enter (equals)
   const handleEnt = () => {
-    console.log('handleEnt called');
-    //only works with existing op1, op2, and a operator
+    //only works with existing op1, op2, and a operator, with no completed calculation in place
     if (res === '' && op1.length > 0 && oper !== '' && op2.length > 0) {
-      //either no scientific notation, or a complete sci not (number must exist after e+) and its not just a - sign
+      //additional requirements of:
+      //either no scientific notation, or a complete sci not (number must exist after e+) 
+      //not just a - sign as entire operand
       if ((!ey || op2[op2.length - 1] !== '+') && op2[op2.length - 1] !== '-') {
-        console.log('full calculation');
         const rekt=calcing(op1,op2,oper);
         setRes(rekt);
         histing(op1,oper,op2,rekt);
-
-
       }
-
     }
-
   }
 
-  //handle +/-
+  //handle +/- (test condition to see if behaves in expected way)
   const handleSign = () => {
-    console.log('handleSign called');
-    //case of complete calculation
-    if (res !== '' && (res!=='undefined' && res!=='infinity')) {
-      const newSign = () => {
-        return new Promise((resolve) => {
-          setOp1('');
-          setOper('');
-          setOp2('-');
-          setRes('');
-          setDec(false);
-          setEy(false);
-          resolve('to new calc with sign');
-        });
-      }
-      newSign().then(msg => console.log(msg));
-
-
+    //case of complete calculation or operand is undefined/infinity
+    if (res !== '' || op2==='undefined' || op2==='infinity') {
+      setOp1('');
+      setOper('');
+      setOp2('-');
+      setRes('');
+      setDec(false);
+      setEy(false);
     }
     //case of existing op2
     else if (op2.length > 0) {
       //case of positive to negative
       if (op2[0] !== '-')
         setOp2('-'.concat(op2));
+      //case of negative to positive
       else
         setOp2(op2.slice(1));
     }
+    //case of empty right operand
     else
       setOp2('-');
   }
 
-  //handle sci notation
+  //handle sci notation (test removal feature)
   const handleEy = () => {
-    console.log('handleEy called');
-    //only works with existing op2 that is not just a zero
-    if (op2.length > 0 && (op2!=='undefined'&&op2!=='infinity')) {
-      if (op2[0] !== '0' || (dec && op2.length > 2)) {
+    //only works with existing op2 that is not undefined/infinity
+    //only works with incomplete calculation
+    if (res==='' && op2.length > 0 && op2!=='undefined' && op2!=='infinity') {
+      //remove sci note. if already exists
+      if (ey) {
+        const newOp2=op2.slice(0,op2.indexOf('e'));
+        setOp2(newOp2);
+        setEy(false);
+      }
+      //not only 0 as operand, not trailing decimal place, sci notation doesn't already exist
+      else if (op2[0] !== '0' || (dec && op2.length > 2) || !ey) {
         setOp2(op2.concat('e+'));
         setEy(true);
       }
@@ -410,10 +446,8 @@ const Core = props => {
   }
   //sqrt, squared
   const handleOther = op => {
-    console.log(`handleother called`)
-    //case of complete calculation (not infinity/undefined)
-    if (res!=='' && (res!=='undefined' && res!=='infinity')) {
-      console.log('complete calculation into sqrt/sq');
+    //case of complete calculation and res not infinity/undefined
+    if (res!=='' && res!=='undefined' && res!=='infinity') {
       let rem=math.bignumber(res);
       if (op === 'sqrt') {
         rem=math.sqrt(rem).toString();
@@ -421,11 +455,12 @@ const Core = props => {
       else {
         rem=math.pow(rem,2).toString();
       }
+      //perform operation based on input, then clear all and set op2
       setOp1('');
       setOper('');
       setOp2(rem);
       setRes('');
-      setDec(false);
+      setDec(rem.includes('.'));
       setEy(rem.includes('e'));
     }
     //only works with existing op2 and incomplete calculations
@@ -451,67 +486,47 @@ const Core = props => {
   const handleClear = e => {
     //all clear
     if (e === 'ac') {
-      const allC = () => {
-        return new Promise((resolve) => {
-          setOp1('');
-          setOper('');
-          setOp2('0');
-          setRes('');
-          setDec(false);
-          setEy(false);
-          resolve('all clear');
-        });
-      }
-      allC().then(msg => console.log(msg));
-
+      setOp1('');
+      setOper('');
+      setOp2('0');
+      setRes('');
+      setDec(false);
+      setEy(false);
     }
     //clear entry
     else {
-      console.log('clear entry called');
       //case of calculation completed, or both operands exist
+      //remove both result and right operand
       if (op1.length > 0 && op2.length > 0) {
-        const cEntry = () => {
-          return new Promise((resolve) => {
-            const saveOp1 = op1;
-            const saveOp = oper;
-            setOp1(saveOp1);
-            setOper(saveOp);
-            setOp2('');
-            setRes('');
-            setDec(false);
-            setEy(false);
-            resolve('clear last entry');
-          });
-        }
-        cEntry().then(msg => console.log(msg));
-
-
+        const saveOp1 = op1;
+        const saveOp = oper;
+        setOp1(saveOp1);
+        setOper(saveOp);
+        setOp2('');
+        setRes('');
+        setDec(false);
+        setEy(false);
       }
       //case of 1 operand plus operator
+      //remove operator, move left operand to right operand
       else if (op1.length > 0 && oper) {
-        const cOp = () => {
-          return new Promise((resolve) => {
-            const saveOp1 = op1;
-            setOp1('');
-            setOper('');
-            setOp2(saveOp1);
-            setRes('');
-            setEy((/e\+/i).test(saveOp1));
-            setDec((/\./).test(saveOp1));
-            resolve('clear last operator');
-          });
-        }
-        cOp().then(msg => console.log(msg));
-
+        const saveOp1 = op1;
+        setOp1('');
+        setOper('');
+        setOp2(saveOp1);
+        setRes('');
+        setEy((/e\+/i).test(saveOp1));
+        setDec((/\./).test(saveOp1));
       }
       //case of only 1 operand
+      //clear existing right operand
       else {
         setOp2('');
       }
     }
   }
 
-  //time travel
+  //time travel given index
   const handleHist = i => {
     const toSet=hist[i];
     setOp1(toSet[0]);
@@ -519,11 +534,12 @@ const Core = props => {
     setOp2(toSet[2]);
     setRes(toSet[3]);
   }
+
   //handle backspaces
-  //problem of turning op1 back to 2, nd decimals etc
   const handleDel = () => {
-    //only works with existing op2 and no complete calculation
+    //no complete calculation only
     if (res === '') {
+      //case existing right operand
       if (op2.length > 0) {
         //case of on the scientific notation 
         if (op2[op2.length - 1] === '+') {
@@ -535,62 +551,56 @@ const Core = props => {
           setOp2(op2.slice(0, op2.length - 1));
           setDec(false);
         }
+        //case of 0-9 or -
         else {
           setOp2(op2.slice(0, op2.length - 1));
         }
       }
+      //case left operand and operator
+      //remove operator and move left operand to right operand
       else if (op1.length > 0 && oper) {
-        const dOp = () => {
-          return new Promise((resolve) => {
-            const saveOp1 = op1;
-            setOp1('');
-            setOper('');
-            setOp2(saveOp1);
-            setRes('');
-            setEy((/e\+/i).test(saveOp1));
-            setDec((/\./).test(saveOp1));
-            resolve('clear last operator');
-          });
-        }
-        dOp().then(msg => console.log(msg));
-
-
+        const saveOp1 = op1;
+        setOp1('');
+        setOper('');
+        setOp2(saveOp1);
+        setRes('');
+        setEy((/e\+/i).test(saveOp1));
+        setDec((/\./).test(saveOp1));
       }
     }
-
-
-
   }
 
   return (
     <div id="core"
-      style={w>900?{...bigSty}:{...mobSty}}>
+      style={props.w>900?{...bigSty}:{...mobSty}}>
       <HistList hist={hist} 
-        h={h}
-        w={w}
+        h={props.h}
+        w={props.w}
         handleHist={handleHist}
         handlePow={props.handlePow}
         power={props.power}/>
       <Calc 
-        h={h}
-        w={w}
+        h={props.h}
+        w={props.w}
         op1={op1}
         oper={oper}
         op2={op2}
         res={res}
         hist={hist}
         handleEvent={handleEvent} />
-
-
-
     </div>
   )
 }
+
+//the calculator itself
+//contains a display and calculator buttons
 const Calc = props => {
+  //desktop, side by side with history
   const bigSty={
     position:'relative',
     marginLeft:'100px'
   }
+  //mobile, center of page below history
   const mobSty={
     position:'absolute',
     top:`${Math.max((props.h-540)/2+40,40)}px`
@@ -608,6 +618,11 @@ const Calc = props => {
     </div>
   )
 }
+
+//display
+//contains a 'fixed string' with small font on top left
+//contains a 'variable string' open to change on bottom right
+//variable string font size doubles under 16 chars in length
 const Display = props => {
   let dispStr = '';
   let disp = '';
@@ -619,16 +634,14 @@ const Display = props => {
     dispStr = props.op1 + ' ' + props.oper + ' ' + props.op2 + '=';
     disp = props.res;
   }
-  //rudimentary handling of display
-  //const dispStr=props.op1+' '+props.oper+' '+props.op2+(props.res!==''?'=':'');
-  //const ans=props.res;
+
   return (
     <div id="scr">
       <div id='operation'>
         <p>{dispStr}</p>
       </div>
       <div id="display" 
-           style={{fontSize:disp.length>16?'1rem':'2rem'}}>
+           style={{fontSize:disp.length>=15?'1rem':'2rem'}}>
         <p>{disp}</p>
       </div>
     </div>
@@ -636,9 +649,12 @@ const Display = props => {
   )
 }
 
+//calculator buttons
 const CalcPad = props => {
   const [url] = useState('https://raw.githubusercontent.com/MatchaCrisp/JSCalculator/main/public/button.json');
   const [buttons, setButtons] = useState([]);
+
+  //convert from object to pad component
   const renderButton = button => <Pad
     className={button.class}
     id={button.id}
@@ -646,6 +662,8 @@ const CalcPad = props => {
     key={button.id}
     desc={button.desc}
     handleEvent={props.handleEvent} />
+
+  //fetch json with list of buttons and attributes
   useEffect(() => {
     if (!url) return;
 
@@ -657,6 +675,7 @@ const CalcPad = props => {
     fetchData().catch(console.log);
   }, [url]);
 
+  //map from array of obj to pad component
   const jsx = buttons.map(button => renderButton(button));
   return (
     <div id="calcPad">
@@ -665,32 +684,40 @@ const CalcPad = props => {
   )
 }
 
+//list of history
 const HistList = props => {
+  //up when expanded (power off)
+  //down when collapsed (power on)
   const upAr=<i className="fas fa-arrow-up" />;
   const downAr=<i className="fas fa-arrow-down" />;
 
-  //expand
+  //collapsible history on top of viewport in mobile view
   const mobSty={
     transition:'height 200ms ease-in',
     height:props.power?'40px':'540px',
     boxShadow:props.power?'none':'0px 0px 10px #CCC'
   };
 
+  //full size history on left of calculator in desktop view
   const bigSty={
-    height:`${Math.min(500,props.h)}px`
+    height:`${Math.min(540,props.h)}px`
   }
+
   const handleExp=e=>{
     props.handlePow(e);
   }
+  //renders from array to history component
   //hashing for better key
   const renderHist = (histI,ind) => <History
     ind = {ind}
-    key = {ind}
+    key = {histI[4]}
     hist = {histI}
     handleHist = {props.handleHist}
     handleExp= {handleExp}
     />
 
+  //map array of arrays to list of history components
+  //better key for header
   const jsx = [<div id="histHeader" key="-1">Past Calculations</div>,...props.hist.map((histI,ind)=>renderHist(histI,ind))];
   return (
     <div id="histList" style={props.w>900?{...bigSty}:{...mobSty}}>
@@ -703,35 +730,47 @@ const HistList = props => {
   )
 }
 
+//interactive history item
 const History = props => {
 
+  //time travel by passing back own index when clicked, turn power on
   const handleClick=()=>{
     props.handleHist(props.ind);
     props.handleExp(true);
   }
+  
+  //generate displayed history text
   const genHist=()=>{
+    //truncate sig. dig. when e+ exists to 15 in total length of string
+    //truncate sign. dig. when it is decimal number to 15 
     const truncator=str=>{
       if (str.includes('e')) {
         const toTrun = str.split('e');
-        toTrun[0]=toTrun[0].slice(0,15-toTrun[1].length-3)+'...';
+        toTrun[0]=toTrun[0].slice(0,15-toTrun[1].length-3)+'(...)';
         return toTrun.join('e');
+      }
+      else if (str.includes('.')) {
+        const toTrun=str.split('.');
+        toTrun[1]=toTrun[1].slice(0,15-toTrun[0].length-3)+'(...)';
+        return toTrun.join('.');
       }
       return str;
 
     }
-    let str=props.hist[0].length>15?truncator(props.hist[0]):props.hist[0];
-    str+=` ${props.hist[1]} `;
-    str+=props.hist[2].length>15?truncator(props.hist[2]):props.hist[2];
-    str+=' = ';
-    str+=props.hist[3].length>15?truncator(props.hist[3]):props.hist[3];
+    //assemble result string
+    let str1=props.hist[0].length>15?truncator(props.hist[0]):props.hist[0];
+    str1+= ` ${props.hist[1]} `;
+    str1+= props.hist[2].length>15?truncator(props.hist[2]):props.hist[2];
+    let str2= '= ';
+    str2+=props.hist[3].length>15?truncator(props.hist[3]):props.hist[3];
 
-    return str;
+    return <div><p className="hisOp">{str1}</p><p className="hisRes">{str2}</p></div>;
   }
   const jsx=genHist();
   return (
     <div onClick={handleClick}
       className='histItem'>
-      <p>{jsx}</p>
+      {jsx}
     </div>
   )
 } 

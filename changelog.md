@@ -97,3 +97,19 @@
  * proper color scheme
  * test max history size and how it fits 
 
+# v0.7 SCSS and troubleshooting
+## new
+ * fixed +/-, e+, pow, sqrt handling behavior to match expectations
+ * removed console.logs
+ * bg img
+ * color scheme
+ * history key hashing
+ * operator behavior testing (cannot reproduce infinity multiplication bug, added additional check in calcing method as precaution)
+ * reduce history size to 13
+ * fixed power staying off when resizing viewport above breakpoint
+ * split history display text to put result always on the right
+
+## to do
+ * split components
+ * change readme
+ * build&publish
