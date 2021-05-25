@@ -113,3 +113,11 @@
  * split components
  * change readme
  * build&publish
+
+# v1.0 build
+## new
+ * split components
+ * update readme.md
+ * deleted unnecessary comments
+ * deleted redundant imgs
+ * build

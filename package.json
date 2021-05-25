@@ -1,5 +1,5 @@
 {
-  "homepage": "http://matchacrisp.github.io/JSCalc",
+  "homepage": "http://matchacrisp.github.io/JSCalculator",
   "name": "js-calc",
   "version": "0.1.0",
   "private": true,
@@ -41,6 +41,6 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^3.1.0"
+    "gh-pages": "^3.2.0"
   }
 }
