@@ -1,5 +1,10 @@
+// external
+// react
 import React, {useState,useEffect} from 'react';
+// internal
+// hook
 import useWindDim from './hook/useWindDim';
+// component
 import Core from './comp/Core';
 
 //background & on/off

@@ -1,4 +1,8 @@
+// external
+// react
 import React from 'react';
+// internal
+// components
 import Display from './Display';
 import CalcPad from './CalcPad';
 

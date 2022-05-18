@@ -1,12 +1,18 @@
+// external
+// react
 import React, {useState} from 'react';
-import HistList from './HistList';
-import Calc from './Calc';
+// mathjs
 import { create, all } from 'mathjs';
 
+// internal
+// components
+import HistList from './HistList';
+import Calc from './Calc';
 
-//dig. lim.
+// mathjs config
+//digit limit
 const digLim=22;
-//sig. dig.
+//significant digits
 const config = {
   precision: digLim
 };

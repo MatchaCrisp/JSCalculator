@@ -1,4 +1,8 @@
+// external
+// react
 import React from 'react';
+// internal
+// components
 import History from './History';
 //list of history
 const HistList = props => {

@@ -1,4 +1,8 @@
+// external
+// react
 import React, {useState, useEffect} from 'react';
+// internal
+// component
 import Pad from './Pad';
 //calculator buttons
 const CalcPad = props => {
