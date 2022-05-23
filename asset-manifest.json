@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.css": "/JSCalculator/static/css/main.193111c8.chunk.css",
-    "main.js": "/JSCalculator/static/js/main.e23e8fa5.chunk.js",
-    "main.js.map": "/JSCalculator/static/js/main.e23e8fa5.chunk.js.map",
+    "main.css": "/JSCalculator/static/css/main.76317281.chunk.css",
+    "main.js": "/JSCalculator/static/js/main.8978110d.chunk.js",
+    "main.js.map": "/JSCalculator/static/js/main.8978110d.chunk.js.map",
     "runtime-main.js": "/JSCalculator/static/js/runtime-main.a4784014.js",
     "runtime-main.js.map": "/JSCalculator/static/js/runtime-main.a4784014.js.map",
     "static/js/2.2aba4d4a.chunk.js": "/JSCalculator/static/js/2.2aba4d4a.chunk.js",
     "static/js/2.2aba4d4a.chunk.js.map": "/JSCalculator/static/js/2.2aba4d4a.chunk.js.map",
     "index.html": "/JSCalculator/index.html",
-    "static/css/main.193111c8.chunk.css.map": "/JSCalculator/static/css/main.193111c8.chunk.css.map",
+    "static/css/main.76317281.chunk.css.map": "/JSCalculator/static/css/main.76317281.chunk.css.map",
     "static/js/2.2aba4d4a.chunk.js.LICENSE.txt": "/JSCalculator/static/js/2.2aba4d4a.chunk.js.LICENSE.txt",
     "static/media/index.scss": "/JSCalculator/static/media/bg2.3299b029.jpg"
   },
   "entrypoints": [
     "static/js/runtime-main.a4784014.js",
     "static/js/2.2aba4d4a.chunk.js",
-    "static/css/main.193111c8.chunk.css",
-    "static/js/main.e23e8fa5.chunk.js"
+    "static/css/main.76317281.chunk.css",
+    "static/js/main.8978110d.chunk.js"
   ]
 }
